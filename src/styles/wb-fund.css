@@ -1,0 +1,680 @@
+/* 本文件由 scripts/scope-css.mjs 从旧应用样式作用域化生成，勿手改；
+   来源：资金库规划器（fund-planner）；所有选择器限定在 .wb-fund 容器内，避免与外壳/其他模块冲突。 */
+
+.wb-fund {
+--bg: #f4f6f9;
+  --card: #ffffff;
+  --line: #e4e8ee;
+  --text: #22303f;
+  --sub: #6b7a8c;
+  --primary: #2f6fed;
+  --green: #3aa675;
+  --orange: #e8a33d;
+  --purple: #8f6fd8;
+  --blue: #4a90d9;
+  --red: #d9534f;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(30, 50, 80, .08);
+}
+
+.wb-fund * {
+box-sizing: border-box; margin: 0; padding: 0;
+}
+
+.wb-fund .page-title {
+font-size: 20px; font-weight: 700; margin-bottom: 4px;
+}
+
+.wb-fund .page-sub {
+color: var(--sub); margin-bottom: 18px; font-size: 13px;
+}
+
+.wb-fund .card {
+background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 16px;
+}
+
+.wb-fund .card-title {
+font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+}
+
+.wb-fund .grid {
+display: grid; gap: 16px;
+}
+
+.wb-fund .grid-2 {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wb-fund .grid-3 {
+grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wb-fund .grid-4 {
+grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* 5 列栅格：三笔钱新增「借出应收」第5分类后，结构占比/快照卡改用 */
+.wb-fund .grid-5 {
+grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.wb-fund .stat {
+display: flex; flex-direction: column; gap: 2px;
+}
+
+.wb-fund .stat-label {
+color: var(--sub); font-size: 12px;
+}
+
+.wb-fund .stat-value {
+font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+.wb-fund .stat-value.pos {
+color: var(--green);
+}
+
+.wb-fund .stat-value.neg {
+color: var(--red);
+}
+
+.wb-fund .stat-extra {
+font-size: 12px; color: var(--sub);
+}
+
+.wb-fund .btn {
+display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: #fff; color: var(--text); cursor: pointer; font-size: 14px;
+}
+
+.wb-fund .btn:hover {
+border-color: var(--primary); color: var(--primary);
+}
+
+.wb-fund .btn-primary {
+background: var(--primary); border-color: var(--primary); color: #fff;
+}
+
+.wb-fund .btn-primary:hover {
+color: #fff; opacity: .9;
+}
+
+.wb-fund .btn-danger {
+color: var(--red); border-color: transparent; background: none; padding: 4px 8px;
+}
+
+.wb-fund .btn-sm {
+padding: 4px 10px; font-size: 12px; border-radius: 6px;
+}
+
+.wb-fund .btn:disabled {
+opacity: .5; cursor: not-allowed;
+}
+
+.wb-fund .field {
+margin-bottom: 12px;
+}
+
+.wb-fund .field label {
+display: block; font-size: 13px; color: var(--sub); margin-bottom: 4px;
+}
+
+.wb-fund .input,
+.wb-fund .select,
+.wb-fund .textarea {
+width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  font-size: 14px; background: #fff; color: var(--text); font-family: inherit;
+}
+
+.wb-fund .input:focus,
+.wb-fund .select:focus,
+.wb-fund .textarea:focus {
+outline: none; border-color: var(--primary);
+}
+
+.wb-fund .textarea {
+resize: vertical; min-height: 72px;
+}
+
+.wb-fund .segmented {
+display: inline-flex; background: #eaeef4; border-radius: 8px; padding: 3px; gap: 2px;
+}
+
+.wb-fund .segmented button {
+border: none; background: none; padding: 5px 14px; border-radius: 6px;
+  cursor: pointer; font-size: 13px; color: var(--sub);
+}
+
+.wb-fund .segmented button.active {
+background: #fff; color: var(--text); box-shadow: var(--shadow); font-weight: 600;
+}
+
+.wb-fund .tag {
+display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px;
+  background: #eef2f8; color: var(--sub);
+}
+
+.wb-fund .tag-life {
+background: #e2f3ea; color: var(--green);
+}
+
+.wb-fund .tag-invest {
+background: #fbf0dd; color: #b97c1e;
+}
+
+.wb-fund .tag-insurance {
+background: #eee7fa; color: var(--purple);
+}
+
+.wb-fund .tag-fixed {
+background: #e3eefa; color: var(--blue);
+}
+
+/* 借出应收标签（第5分类，青色系） */
+.wb-fund .tag-lend {
+background: #ddf3f6; color: #0e7f90;
+}
+
+.wb-fund .tag-asset {
+background: #e2f3ea; color: var(--green);
+}
+
+.wb-fund .tag-liability {
+background: #fbe5e4; color: var(--red);
+}
+
+.wb-fund .list-row {
+display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 4px; border-bottom: 1px solid var(--line);
+}
+
+.wb-fund .list-row:last-child {
+border-bottom: none;
+}
+
+.wb-fund .list-main {
+min-width: 0;
+}
+
+.wb-fund .list-name {
+font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
+.wb-fund .list-note {
+font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;
+}
+
+.wb-fund .amount {
+font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+.wb-fund .amount.pos {
+color: var(--green);
+}
+
+.wb-fund .amount.neg {
+color: var(--red);
+}
+
+.wb-fund .bar {
+/* 占比小条：flex 分段，段间 2px 底色缝形成分隔"小块"；overflow visible 容纳悬浮提示 */
+display: flex; gap: 2px; height: 10px; background: var(--line); border-radius: 999px;
+margin-top: 6px; position: relative;
+}
+
+.wb-fund .bar > i {
+display: block; height: 100%; border-radius: 3px; min-width: 4px;
+transition: filter .12s ease;
+}
+.wb-fund .bar > i:first-child { border-radius: 999px 3px 3px 999px; }
+.wb-fund .bar > i:last-child { border-radius: 3px 999px 999px 3px; }
+
+.wb-fund .bar > i:hover { filter: brightness(1.18); }
+
+/* 占比小条悬浮提示：资金名 + 金额 + 占比 */
+.wb-fund .bar-tip {
+position: absolute; top: -30px; transform: translateX(-50%);
+background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow);
+color: var(--text); font-size: 12px; line-height: 1; padding: 5px 9px;
+border-radius: 7px; white-space: nowrap; z-index: 6; pointer-events: none;
+}
+
+.wb-fund .modal-mask {
+position: fixed; inset: 0; background: rgba(15, 25, 40, .45);
+  display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px;
+}
+
+.wb-fund .modal {
+background: #fff; border-radius: 14px; padding: 20px; width: 100%; max-width: 440px;
+  max-height: 88vh; overflow: auto;
+}
+
+.wb-fund .modal-title {
+font-size: 16px; font-weight: 700; margin-bottom: 14px;
+}
+
+.wb-fund .modal-actions {
+display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;
+}
+
+.wb-fund .chart-box {
+position: relative; width: 100%; height: 260px;
+}
+
+.wb-fund .chart-box.tall {
+height: 300px;
+}
+
+.wb-fund .chart-empty {
+color: var(--sub); text-align: center; padding: 40px 0; font-size: 13px;
+}
+
+.wb-fund .empty {
+text-align: center; color: var(--sub); padding: 28px 12px; background: #fafbfd; border: 1px dashed var(--line); border-radius: var(--radius);
+}
+
+/* 数据看板「资产构成与对比」：饼图/柱状图各占一半（50/50 + 明确间隔），
+   窄屏折叠上下；两列各自"标题+内容"同构、整体垂直居中 */
+.wb-fund .wb-comp-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px; align-items: center; }
+.wb-fund .wb-comp-pie { min-width: 0; }
+.wb-fund .wb-comp-pie .empty { height: 100%; display: flex; align-items: center; justify-content: center; }
+.wb-fund .wb-comp-bar { min-width: 0; }
+.wb-fund .wb-comp-row .empty { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; }
+/* 饼图图例：色块小方 + 分类名 + 占比（扇形图的图示示例小块） */
+.wb-fund .wb-pie-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; margin-top: 10px; }
+.wb-fund .wb-pie-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2, #5a6b80); }
+.wb-fund .wb-pie-legend-item i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.wb-fund .wb-pie-legend-item b { font-weight: 700; color: var(--text, #22303f); font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .wb-fund .wb-comp-row { grid-template-columns: 1fr; }
+}
+
+.wb-fund .hint {
+font-size: 12px; color: var(--sub); margin-top: 6px;
+}
+
+.wb-fund .delta-up {
+color: var(--green); font-size: 12px;
+}
+
+.wb-fund .delta-down {
+color: var(--red); font-size: 12px;
+}
+
+.wb-fund .syncbar {
+display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 10px 14px; margin-bottom: 18px; font-size: 13px;
+}
+
+.wb-fund .sync-label {
+font-weight: 700; white-space: nowrap;
+}
+
+.wb-fund .sync-msg {
+color: var(--sub); flex: 1; min-width: 150px;
+}
+
+.wb-fund .sync-actions {
+display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
+.wb-fund .sync-dot {
+width: 9px; height: 9px; border-radius: 999px; background: #b9c4d2; flex: none;
+}
+
+.wb-fund .sync-dot.ok {
+background: var(--green);
+}
+
+.wb-fund .sync-dot.warn {
+background: var(--orange);
+}
+
+.wb-fund .sync-dot.bad {
+background: var(--red);
+}
+
+.wb-fund .warn-box {
+background: #fbf3e3; color: #8a5b12; border-radius: 8px;
+  padding: 10px 12px; font-size: 12px; line-height: 1.7; margin-bottom: 14px;
+}
+
+.wb-fund .check-row {
+display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--sub); margin: 2px 0 10px; cursor: pointer;
+}
+
+.wb-fund .check-row input {
+margin-top: 3px;
+}
+
+@media (max-width: 760px) {
+.wb-fund .syncbar {
+padding: 8px 10px; gap: 6px; margin-bottom: 12px;
+}
+
+.wb-fund .sync-msg {
+min-width: 100%; order: 3;
+}
+
+.wb-fund .sync-actions {
+order: 4; width: 100%;
+}
+
+.wb-fund .grid-2,
+.wb-fund .grid-3,
+.wb-fund .grid-4,
+.wb-fund .grid-5 {
+grid-template-columns: 1fr;
+}
+
+.wb-fund .stat-value {
+font-size: 19px;
+}
+
+.wb-fund .list-note {
+max-width: 150px;
+}
+}
+
+/* ---------- 日常记账（expense tab） ---------- */
+.wb-fund .eb-amount {
+font-size: 1.15rem; font-weight: 600;
+}
+
+.wb-fund .eb-flash {
+margin-top: 10px; color: var(--green);
+}
+
+.wb-fund .eb-budget-tag {
+font-size: 12px; padding: 2px 10px; border-radius: 999px;
+background: var(--panel-2); border: 1px solid var(--border);
+}
+
+.wb-fund .eb-budget-tag.warn {
+background: rgba(232, 161, 60, .14); border-color: rgba(232, 161, 60, .5); color: #b97a16;
+}
+
+.wb-fund .eb-budget-tag.over {
+background: rgba(217, 83, 79, .12); border-color: rgba(217, 83, 79, .5); color: var(--red);
+}
+
+.wb-fund .eb-budget-bar {
+height: 8px; border-radius: 999px; background: var(--panel-2);
+border: 1px solid var(--border); overflow: hidden;
+}
+
+.wb-fund .eb-budget-bar span {
+display: block; height: 100%; border-radius: 999px;
+background: var(--green); transition: width .3s;
+}
+
+.wb-fund .eb-budget-bar span.warn {
+background: #e8a13c;
+}
+
+.wb-fund .eb-budget-bar span.over {
+background: var(--red);
+}
+
+.wb-fund .eb-month {
+margin-bottom: 14px;
+}
+
+.wb-fund .eb-month-head {
+display: flex; align-items: center; gap: 10px; margin: 4px 0;
+}
+
+.wb-fund .eb-month-sum {
+font-size: 13px;
+}
+
+.wb-fund .eb-cat {
+display: inline-block; min-width: 44px; text-align: center;
+font-size: 12px; padding: 1px 8px; border-radius: 999px;
+background: var(--panel-2); border: 1px solid var(--border);
+}
+
+.wb-fund .eb-cat.in {
+background: rgba(58, 166, 117, .12); border-color: rgba(58, 166, 117, .45);
+}
+
+/* ============================================================
+   2026-11-15 改版追加（分块资产管家 / 三笔钱拖拽板块 / 记录对比 / 记账表单）
+   注意：追加段的变量沿用外壳的 --panel/--border 系与上方 .wb-fund 局部变量
+   ============================================================ */
+
+/* ---------- 堆叠分区卡（数据看板/记账/投资收益共用）：更宽松的内边距 ---------- */
+.wb-fund .wb-widget { padding: 14px 18px 18px; }
+.wb-fund .wb-widget-header { margin-bottom: 14px; }
+.wb-fund .wb-stack { gap: 16px; }
+
+/* ---------- 快速记一笔：栅格表单，不再靠 flex 硬挤 ---------- */
+.wb-fund .eb-form {
+  display: grid; gap: 10px; align-items: end;
+  grid-template-columns: 150px 130px 165px minmax(220px, 1fr) auto;
+}
+.wb-fund .eb-form .field { margin-bottom: 0; }
+.wb-fund .eb-type-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+@media (max-width: 1100px) {
+  .wb-fund .eb-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wb-fund .eb-form .eb-form-note { grid-column: 1 / -1; }
+  .wb-fund .eb-form .eb-form-submit { grid-column: 1 / -1; justify-self: end; }
+}
+
+/* ---------- 资产管家：分块布局 ---------- */
+.wb-fund .am-grid {
+  display: grid; gap: 14px; align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+.wb-fund .am-block {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 12px 14px 14px; min-width: 0;
+  border-left: 4px solid var(--am-accent, var(--primary));
+}
+.wb-fund .am-block.is-dragging {
+  opacity: .4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.wb-fund .am-block-head .bd-grip { flex: none; }
+/* 三笔钱板块整块拖拽时的源块虚影（浮层克隆跟随指针） */
+.wb-fund .tm-board.is-dragging { opacity: .4; border-style: dashed; }
+.wb-fund .am-block-head { display: flex; align-items: center; gap: 8px; cursor: pointer; flex-wrap: wrap; }
+.wb-fund .am-block-name {
+  font-weight: 700; font-size: 14px; flex: 1; min-width: 96px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* 块头编辑/删除悬停显形（＋添加款项常显，保录入入口）；名字给足空间，放不下换行而不是挤压 */
+.wb-fund .am-block-ops .btn { opacity: 0; transition: opacity .12s ease; }
+.wb-fund .am-block-ops .btn:last-child { opacity: 1; }
+.wb-fund .am-block-head:hover .am-block-ops .btn,
+.wb-fund .am-block-head:focus-within .am-block-ops .btn { opacity: 1; }
+.wb-fund .am-block-sums { margin: 10px 0 4px; }
+.wb-fund .am-items { margin-top: 6px; }
+.wb-fund .am-item {
+  display: flex; align-items: center; gap: 8px; padding: 6px 4px;
+  border-bottom: 1px dashed var(--line); border-radius: 8px; font-size: 13px;
+}
+.wb-fund .am-item:last-child { border-bottom: none; }
+.wb-fund .am-item.is-dragging {
+  opacity: .4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.wb-fund .am-item:hover { background: var(--panel-2); }
+.wb-fund .am-item-name { flex: 1; min-width: 0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wb-fund .am-item .btn { opacity: 0; transition: opacity .12s ease; }
+.wb-fund .am-item:hover .btn, .wb-fund .am-item .btn:focus-visible { opacity: 1; }
+.wb-fund .am-overlay {
+  background: var(--card); border: 1px solid var(--primary); border-radius: 10px;
+  box-shadow: var(--shadow-lg); padding: 8px 12px; cursor: grabbing; z-index: 40;
+  display: flex; align-items: center; gap: 8px; min-width: 200px; font-size: 13px;
+}
+
+/* ---------- 三笔钱：板块 + 可拖拽子项 ---------- */
+.wb-fund .tm-boards { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+@media (max-width: 900px) { .wb-fund .tm-boards { grid-template-columns: 1fr; } }
+.wb-fund .tm-board {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 14px 16px; min-height: 120px; position: relative;
+  border-top: 3px solid var(--tm-color, var(--primary));
+}
+.wb-fund .tm-board.is-over { outline: 2px dashed var(--tm-color, var(--primary)); outline-offset: 3px; }
+.wb-fund .tm-chips { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; min-height: 44px; }
+.wb-fund .tm-chip {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--panel-2, #f6f8fb); border: 1px solid var(--line); border-radius: 10px;
+  cursor: grab; touch-action: none; user-select: none; font-size: 13px; min-width: 0;
+}
+.wb-fund .tm-chip:hover { border-color: var(--tm-color, var(--primary)); }
+.wb-fund .tm-chip.is-dragging { opacity: .4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft); }
+.wb-fund .tm-chip-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wb-fund .tm-chip-amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wb-fund .tm-chip-amount.pos { color: var(--green); }
+.wb-fund .tm-chip-amount.neg { color: var(--red); }
+.wb-fund .tm-overlay {
+  background: var(--card); border: 1px solid var(--primary); border-radius: 10px;
+  box-shadow: var(--shadow-lg); padding: 8px 12px; cursor: grabbing; z-index: 40;
+  display: flex; align-items: center; gap: 8px; min-width: 200px; font-size: 13px;
+}
+.wb-fund .tm-board-empty { color: var(--sub); font-size: 12px; padding: 10px; text-align: center;
+  border: 1px dashed var(--line); border-radius: 10px; }
+
+/* ---------- 记录对比（原周汇总） ---------- */
+.wb-fund .cmp-selects { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wb-fund .cmp-selects .select { width: auto; min-width: 230px; }
+.wb-fund .cmp-note {
+  background: #eef4ff; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.9; margin-top: 12px; color: var(--text);
+}
+.wb-fund .cmp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 4px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+.wb-fund .cmp-row:last-child { border-bottom: none; }
+.wb-fund .cmp-row-name { font-weight: 600; }
+.wb-fund .cmp-vals { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; }
+.wb-fund .cmp-muted { color: var(--sub); font-size: 12px; }
+.wb-fund .granular-seg { margin-left: 10px; }
+
+/* ============================================================
+   购物清单（expense 路由，ShoppingList.jsx）：清单块网格 + 子项行 + 跨清单拖拽
+   颜色一律取自 wb-shell.css 的设计变量（--panel/--border/--primary/--green/--text-3 等），
+   深色主题自动适配，不硬编码色值
+   ============================================================ */
+
+/* ---------- 清单块网格：块可整块拖动换位（rectSortingStrategy） ---------- */
+.wb-fund .sl-grid {
+  display: grid; gap: 14px; align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+.wb-fund .sl-list {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius, 12px);
+  box-shadow: var(--shadow); padding: 12px 14px 14px; min-width: 0; min-height: 120px;
+  border-top: 3px solid var(--primary);
+}
+/* 整块拖拽时的源块虚影（浮层克隆跟随指针）与落点高亮 */
+.wb-fund .sl-list.is-dragging { opacity: .4; border-style: dashed; border-color: var(--primary); }
+.wb-fund .sl-list.is-over { outline: 2px dashed var(--primary); outline-offset: 3px; }
+
+/* ---------- 块头：把手 + 清单名 + 统计 + 操作（✏/🗑 悬停显形） ---------- */
+.wb-fund .sl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.wb-fund .sl-head .bd-grip { flex: none; }
+.wb-fund .sl-name {
+  font-weight: 700; font-size: 14px; min-width: 0; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wb-fund .sl-rename { flex: 1; min-width: 96px; padding: 4px 8px; font-size: 14px; font-weight: 700; }
+.wb-fund .sl-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex: 1; min-width: 0; text-align: right; }
+.wb-fund .sl-ops { display: flex; align-items: center; gap: 2px; flex: none; }
+.wb-fund .sl-ops .bd-del:disabled { cursor: not-allowed; }
+
+/* ---------- 添加行（块内顶部：名称必填 + 价格可选 + 按钮） ---------- */
+.wb-fund .sl-add { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.wb-fund .sl-add-text { flex: 1; min-width: 140px; padding: 6px 10px; font-size: 13px; }
+.wb-fund .sl-add-price { flex: none; width: 110px; padding: 6px 10px; font-size: 13px; }
+.wb-fund .sl-add .btn { flex: none; padding: 5px 12px; font-size: 13px; }
+
+/* ---------- 子项行：把手 + 勾选圈 + 文本/备注/价格 + 操作（悬停显形） ---------- */
+.wb-fund .sl-items { display: flex; flex-direction: column; gap: 2px; min-height: 44px; }
+.wb-fund .sl-item {
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px; border-radius: 10px;
+  border: 1px solid transparent; font-size: 13px; transition: background 0.15s ease;
+  touch-action: none; user-select: none;
+}
+.wb-fund .sl-item:hover { background: var(--panel-2); border-color: var(--border); }
+.wb-fund .sl-item.is-dragging { opacity: .4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft); }
+.wb-fund .sl-item.done .sl-title { color: var(--text-3); text-decoration: line-through; }
+.wb-fund .sl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.wb-fund .sl-title-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.wb-fund .sl-title { font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.wb-fund .sl-price { font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--green); }
+.wb-fund .sl-note { font-size: 12px; color: var(--text-3); overflow-wrap: anywhere; }
+
+/* 勾选圈：已购 = 绿色实心 ✓（轻微放大），未购 = 空心圈 */
+.wb-fund .sl-check {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--panel); color: #fff; font-size: 0.72rem; line-height: 1; padding: 0;
+  display: inline-grid; place-items: center; cursor: pointer; flex-shrink: 0;
+  transition: all 0.18s var(--wb-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+.wb-fund .sl-check:hover { border-color: var(--primary); }
+.wb-fund .sl-check.on { background: var(--green); border-color: var(--green); transform: scale(1.08); }
+
+/* 悬停显形（分层口径）：悬停/焦点在子项行只显子项把手，在清单块（块头/空白）只显块把手 */
+.wb-fund .sl-list:hover .sl-head .bd-grip, .wb-fund .sl-list:focus-within .sl-head .bd-grip,
+.wb-fund .sl-item:hover .bd-grip, .wb-fund .sl-item:focus-within .bd-grip { opacity: 1; }
+.wb-fund .sl-list:has(.sl-item:hover) .sl-head .bd-grip,
+.wb-fund .sl-list:has(.sl-item:focus-within) .sl-head .bd-grip { opacity: 0; }
+.wb-fund .sl-head:hover .sl-ops .bd-del, .wb-fund .sl-head:focus-within .sl-ops .bd-del,
+.wb-fund .sl-item:hover .bd-del, .wb-fund .sl-item:focus-within .bd-del { opacity: 1; }
+
+/* ---------- 空态 / 底部虚线承接区（拖到块上任意空白处 = 移到该清单末尾） ---------- */
+.wb-fund .sl-empty {
+  color: var(--text-3); font-size: 12px; padding: 18px 10px; text-align: center;
+  border: 1px dashed var(--border); border-radius: 10px; background: var(--panel-2);
+}
+.wb-fund .sl-dropzone {
+  color: var(--text-3); font-size: 11px; padding: 6px 8px; text-align: center;
+  border: 1px dashed var(--border); border-radius: 8px; margin-top: 6px;
+}
+.wb-fund .sl-list.is-over .sl-empty, .wb-fund .sl-list.is-over .sl-dropzone {
+  border-color: var(--primary); color: var(--primary);
+}
+
+/* ---------- 拖拽浮层（DragOverlay 克隆） ---------- */
+.wb-fund .sl-overlay {
+  background: var(--panel); border: 1px solid var(--primary); border-radius: 10px;
+  box-shadow: var(--shadow-lg); padding: 8px 12px; cursor: grabbing; z-index: 40;
+  display: flex; align-items: center; gap: 8px; min-width: 200px; font-size: 13px;
+}
+.wb-fund .sl-overlay-name { font-weight: 700; }
+
+/* ---------- 三笔钱自定义组（板块之上的聚合层）：组头合计/行内改名/删除悬停显形 ---------- */
+.wb-fund .tm-groups { display: flex; flex-direction: column; gap: 14px; }
+.wb-fund .tm-group {
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--panel); padding: 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wb-fund .tm-group.is-over { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.wb-fund .tm-group.is-dragging { opacity: 0.35; }
+.wb-fund .tm-group-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.wb-fund .tm-group-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.wb-fund .tm-group-name { max-width: 220px; font-weight: 700; }
+.wb-fund .tm-group-sums { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--text-2); text-align: right; }
+.wb-fund .tm-group-sums b { font-weight: 700; }
+.wb-fund .tm-group-ops { display: flex; align-items: center; gap: 6px; }
+.wb-fund .tm-group-ops .btn-danger { opacity: 0; transition: opacity 0.15s; }
+.wb-fund .tm-group-head:hover .tm-group-ops .btn-danger,
+.wb-fund .tm-group-head:focus-within .tm-group-ops .btn-danger { opacity: 1; }
+.wb-fund .tm-group-empty {
+  border: 1.5px dashed var(--border); border-radius: 10px; padding: 18px;
+  text-align: center; color: var(--text-3); font-size: 0.82rem;
+}
+.wb-fund .tm-group.is-over .tm-group-empty, .wb-fund .tm-ungrouped.is-over .tm-group-empty {
+  border-color: var(--primary); color: var(--primary); background: var(--primary-soft);
+}
+.wb-fund .tm-ungrouped {
+  margin-top: 14px; border: 1px dashed var(--border); border-radius: 12px;
+  padding: 12px; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wb-fund .tm-ungrouped.is-over { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.wb-fund .tm-ungrouped-head { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.92rem; margin-bottom: 10px; }

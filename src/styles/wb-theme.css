@@ -1,0 +1,166 @@
+/* ============================================================
+   wb-theme.css —— 全局深色主题覆盖层（唯一允许手改的主题文件）
+   ------------------------------------------------------------
+   职责与机制：
+   - index.html 的内联引导脚本与 src/theme.js 负责把解析结果（总是
+     'light' / 'dark' 具体值）写入 document.documentElement.dataset.theme，
+     'auto' 模式由 matchMedia('(prefers-color-scheme: dark)') 解析；
+   - 本文件只按 [data-theme="dark"] 写覆盖，不写 auto 媒体查询：
+     · :root[data-theme="dark"] 优先级高于 :root，覆盖外壳 token；
+     · [data-theme="dark"] .wb-interview / .wb-fund 覆盖两个子模块
+       作用域内各自重定义的 token（wb-fund 用 --card/--line/--sub 命名）；
+   - 末尾「定点修补」针对 wb-fund.css / wb-interview.css 中 grep 得到的
+     硬编码浅色（这两个文件由 scripts/scope-css.mjs 生成、勿手改，
+     深色适配统一收敛在本文件）。
+   ============================================================ */
+
+/* ---------- 外壳 token 覆盖（与 wb-shell.css :root 一一对应） ---------- */
+:root[data-theme="dark"] {
+  --bg: #11141b;
+  --panel: #191e29;
+  --panel-2: #222839;
+  --border: #2b3247;
+  --text: #e4e9f4;
+  --text-2: #a8b1c7;
+  --text-3: #727d99;
+  --primary: #6b93ff;
+  --primary-dark: #97b6ff;
+  --primary-soft: rgba(107, 147, 255, .16);
+  --green: #3ecf8e;
+  --green-soft: rgba(62, 207, 142, .14);
+  --orange: #f2a65a;
+  --orange-soft: rgba(242, 166, 90, .15);
+  --red: #ef7080;
+  --red-soft: rgba(239, 112, 128, .15);
+  --purple: #a48bff;
+  --purple-soft: rgba(164, 139, 255, .16);
+  --shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 4px 14px rgba(0, 0, 0, .28);
+  --shadow-lg: 0 6px 24px rgba(0, 0, 0, .5);
+  /* 表格行头/列头（wb-boards.css :root 定义，深色换蓝灰暗底） */
+  --wt-head-bg: #242c42;
+  --wt-head-text: #b6c1e2;
+  --wt-head-text-dark: #dbe3f7;
+}
+
+/* ---------- 面试模块作用域 token 覆盖（与外壳共用同一组值） ---------- */
+[data-theme="dark"] .wb-interview {
+  --bg: #11141b;
+  --panel: #191e29;
+  --panel-2: #222839;
+  --border: #2b3247;
+  --text: #e4e9f4;
+  --text-2: #a8b1c7;
+  --text-3: #727d99;
+  --primary: #6b93ff;
+  --primary-dark: #97b6ff;
+  --primary-soft: rgba(107, 147, 255, .16);
+  --green: #3ecf8e;
+  --green-soft: rgba(62, 207, 142, .14);
+  --orange: #f2a65a;
+  --orange-soft: rgba(242, 166, 90, .15);
+  --red: #ef7080;
+  --red-soft: rgba(239, 112, 128, .15);
+  --purple: #a48bff;
+  --purple-soft: rgba(164, 139, 255, .16);
+  --shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 4px 14px rgba(0, 0, 0, .28);
+  --shadow-lg: 0 6px 24px rgba(0, 0, 0, .5);
+}
+
+/* ---------- 资金模块作用域 token 覆盖（wb-fund 使用 --card/--line/--sub 命名） ---------- */
+[data-theme="dark"] .wb-fund {
+  --bg: #11141b;
+  --card: #191e29;
+  --line: #2b3247;
+  --text: #e4e9f4;
+  --sub: #a8b1c7;
+  --primary: #6b93ff;
+  --green: #3ecf8e;
+  --orange: #f2a65a;
+  --purple: #a48bff;
+  --blue: #6ba6ff;
+  --red: #ef7080;
+  --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+}
+
+/* ---------- 弹窗遮罩：外壳 + 两个子模块作用域内的同款遮罩 ---------- */
+:root[data-theme="dark"] .modal-mask {
+  background: rgba(0, 0, 0, .55);
+}
+[data-theme="dark"] .wb-interview .modal-mask {
+  background: rgba(0, 0, 0, .55);
+}
+[data-theme="dark"] .wb-fund .modal-mask {
+  background: rgba(0, 0, 0, .55);
+}
+
+/* ---------- wb-fund 定点修补（grep wb-fund.css 硬编码浅色所得选择器） ---------- */
+
+/* segmented 分段容器底 #eaeef4 → 深色；激活块 #fff 白底 + 亮字不可读，一并压深 */
+[data-theme="dark"] .wb-fund .segmented {
+  background: #242c42;
+}
+[data-theme="dark"] .wb-fund .segmented button.active {
+  background: #2e3852;
+  color: var(--text);
+}
+
+/* 按钮 / 输入框 / 下拉 / 文本域 #fff 白底 + 亮字不可读，压深 */
+[data-theme="dark"] .wb-fund .btn {
+  background: var(--card);
+}
+[data-theme="dark"] .wb-fund .input,
+[data-theme="dark"] .wb-fund .select,
+[data-theme="dark"] .wb-fund .textarea {
+  background: #242c42;
+}
+
+/* 标签 chip #eef2f8 → 深色 */
+[data-theme="dark"] .wb-fund .tag {
+  background: #242c42;
+}
+
+/* 投资标签 #fbf0dd + #b97c1e → 半透明橙底 + 亮橙字 */
+[data-theme="dark"] .wb-fund .tag-invest {
+  background: rgba(242, 166, 90, .14);
+  color: #f2c28a;
+}
+
+/* 借出应收标签（第5分类，深色下青色标签） */
+[data-theme="dark"] .wb-fund .tag-lend {
+  background: rgba(23, 162, 180, .16);
+  color: #7fd1dc;
+}
+
+/* 进度条槽 #eef2f8 → 深色 */
+[data-theme="dark"] .wb-fund .bar {
+  background: #242c42;
+}
+
+/* 弹窗 #fff 背景 → var(--card)（.wb-fund 作用域内 --card 已在上方重定义） */
+[data-theme="dark"] .wb-fund .modal {
+  background: var(--card);
+}
+
+/* 同步状态点默认灰 #b9c4d2 → 深灰蓝 */
+[data-theme="dark"] .wb-fund .sync-dot {
+  background: #5b657e;
+}
+
+/* 警告框 #fbf3e3 + #8a5b12 → 半透明橙底 + 亮橙字 */
+[data-theme="dark"] .wb-fund .warn-box {
+  background: rgba(242, 166, 90, .12);
+  color: #f2c28a;
+}
+
+/* 预算条 warn 色 #e8a13c → 与 --orange 统一 */
+[data-theme="dark"] .wb-fund .eb-budget-bar span.warn {
+  background: #f2a65a;
+}
+
+/* 空态占位 / 行悬停 #fafbfd → 深色 */
+[data-theme="dark"] .wb-fund .empty {
+  background: #20263a;
+}
+[data-theme="dark"] .wb-fund .am-item:hover {
+  background: #20263a;
+}

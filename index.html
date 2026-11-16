@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // 防闪白（FOUC）引导：在首帧渲染前把主题写到 <html data-theme="...">，
+      // 逻辑与 src/app/theme.js 的 applyTheme 保持一致；异常时落浅色。
+      (function () {
+        try {
+          var mode = 'auto'
+          try { mode = localStorage.getItem('wb:theme') || 'auto' } catch (e) {}
+          var dark = mode === 'dark'
+          if (mode === 'auto') {
+            try {
+              dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            } catch (e) { dark = false }
+          }
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        } catch (e) {
+          try { document.documentElement.dataset.theme = 'light' } catch (e2) {}
+        }
+      })()
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>个人工作台 · Personal Workbench</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,497 @@
+/* ============================================================
+   生活看板样式：侧栏拖拽槽位 / 任务队列 / 纪念日 / 护肤打卡 / 表格类看板
+   依赖 wb-shell.css 的设计变量（--primary/--green-soft/--orange-soft 等）
+   弹簧缓动变量与 magpie.jsx 的 SPRING_EASING 保持一致
+   ============================================================ */
+:root {
+  --wb-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 表格行头/列头配色：蓝灰调，与单元格可标选项（绿=做得好 / 橙=要注意）明显区分 */
+  --wt-head-bg: #e9eef9;
+  --wt-head-text: #3d5177;
+  --wt-head-text-dark: #2c3e63;
+}
+
+/* 浮层克隆出场：轻微放大回弹（形变手感） */
+@keyframes wb-pop {
+  from { transform: scale(0.94) rotate(0deg); }
+  to { transform: scale(1); }
+}
+
+/* ---------- 侧栏（拖拽排序已移除，入口统一在设置页） ---------- */
+
+/* ---------- 看板页头 ---------- */
+.board-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.board-icon {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--primary-soft);
+  display: inline-grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;
+}
+.board-title { margin: 0; font-size: 1.15rem; font-weight: 800; }
+.board-rename { max-width: 260px; font-size: 1.05rem; font-weight: 700; padding: 4px 10px; }
+.board-sub { font-size: 0.78rem; color: var(--text-3); margin-top: 2px; }
+
+/* 看板页撑满视口：面板填满滚动区剩余高度，页尾不再留大片空白 */
+.board-page { display: flex; flex-direction: column; }
+.board-page .bd-panel { flex: 1; display: flex; flex-direction: column; }
+.board-page .bd-panel > .wt-scroll { flex: 1; display: flex; flex-direction: column; }
+/* 单周视图：行高随剩余空间均匀拉伸（月视图不受影响），行数少时也保持舒适观感 */
+.wt-rows-stretch { flex: 1; }
+.wt-rows-stretch .wt-row { flex: 1 1 auto; min-height: 48px; }
+
+/* ---------- 看板通用 ---------- */
+.bd-panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius, 14px);
+  box-shadow: var(--shadow); padding: 14px 16px 16px;
+}
+.bd-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.bd-stat { font-size: 0.8rem; color: var(--text-2); font-weight: 600; }
+.bd-grow { flex: 1; min-width: 180px; }
+.bd-dashed { border-style: dashed; }
+.bd-inline {
+  padding: 4px 8px; font-size: 0.85rem; border-color: transparent; background: transparent;
+}
+.bd-inline:hover, .bd-inline:focus { border-color: var(--border); background: var(--panel); }
+.bd-hint { font-size: 0.78rem; }
+.bd-del {
+  border: none; background: none; color: var(--text-3); font-size: 0.8rem; border-radius: 6px;
+  padding: 2px 7px; cursor: pointer; opacity: 0; transition: opacity 0.12s ease; flex-shrink: 0;
+}
+.bd-row:hover .bd-del, .ann-row:hover .bd-del, .todo-item:hover .bd-del,
+.hb-row:hover .bd-del, .ck-step:hover .bd-del, .ck-group:hover .bd-del, .ck-section-head:hover .bd-del,
+.wt-rowhead:hover .bd-del, .wt-colhead:hover .bd-del, .ck-group-head:hover .bd-del,
+.hb-row:focus-within .bd-del { opacity: 1; }
+.bd-del:hover { background: var(--red-soft); color: var(--red); }
+
+/* ---------- 拖拽把手显形（全站统一）：默认隐形，悬停/选中（焦点进入）在哪一层就只显哪一层的把手 ——
+   选中子项只显子项把手、选中块只显块把手、选中卡片只显卡把手；
+   嵌套时用 :has() 检测悬停/焦点是否落在更深层，深层显形时压制外层把手（互不干扰）；
+   拖拽浮层克隆（is-grabbing）恒显 ---------- */
+.bd-grip, .wb-grip, .wb-sort-handle { opacity: 0; }
+.todo-item:hover .bd-grip, .hb-row:hover .bd-grip, .ann-row:hover .bd-grip,
+.wt-row:hover .bd-grip, .wt-rowhead:hover .bd-grip, .wt-colhead:hover .bd-grip,
+.ck-section-head:hover .bd-grip, .ck-group-head:hover .bd-grip, .ck-step:hover .bd-grip,
+.am-item:hover .bd-grip, .wb-widget:hover .wb-grip, .wb-sort-row:hover .wb-sort-handle,
+.tm-board:hover .bd-grip,
+.todo-item:focus-within .bd-grip, .hb-row:focus-within .bd-grip, .ann-row:focus-within .bd-grip,
+.wt-row:focus-within .bd-grip, .wt-rowhead:focus-within .bd-grip, .wt-colhead:focus-within .bd-grip,
+.ck-section-head:focus-within .bd-grip, .ck-group-head:focus-within .bd-grip, .ck-step:focus-within .bd-grip,
+.am-item:focus-within .bd-grip, .wb-widget:focus-within .wb-grip, .wb-sort-row:focus-within .wb-sort-handle,
+.tm-board:focus-within .bd-grip,
+.bd-grip.is-grabbing, .wb-grip.is-grabbing, .wb-sort-handle.is-grabbing { opacity: 1; }
+
+/* 卡片级把手（SortableCard 注入的 wb-card-grip）：悬停/聚焦卡片即显形；
+   但悬停/聚焦进入卡内更深层（块/条目行）时只显该层把手，卡片把手让位 ——
+   任务队列等嵌套卡片不再"块把手 + 子项把手一起全显" */
+.wb-sortcard:hover .wb-card-grip, .wb-sortcard:focus-within .wb-card-grip { opacity: 1; }
+.wb-sortcard:has(.todo-item:hover, .am-block:hover, .am-item:hover, .tm-group:hover, .tm-board:hover) .wb-card-grip:not(.is-grabbing),
+.wb-sortcard:has(.todo-item:focus-within, .am-block:focus-within, .am-item:focus-within, .tm-group:focus-within, .tm-board:focus-within) .wb-card-grip:not(.is-grabbing) { opacity: 0; }
+
+/* 资产管家块把手：悬停/聚焦块体（头行/合计区）显形；悬停/聚焦块内款项行时让位 */
+.am-block:hover .am-block-head .bd-grip, .am-block:focus-within .am-block-head .bd-grip { opacity: 1; }
+.am-block:has(.am-item:hover) .am-block-head .bd-grip,
+.am-block:has(.am-item:focus-within) .am-block-head .bd-grip { opacity: 0; }
+
+/* 三笔钱组把手：悬停/聚焦组（组头/组内空白）显形；悬停/聚焦组内板块时让位 */
+.tm-group:hover .tm-group-head .bd-grip, .tm-group:focus-within .tm-group-head .bd-grip { opacity: 1; }
+.tm-group:has(.tm-board:hover) .tm-group-head .bd-grip,
+.tm-group:has(.tm-board:focus-within) .tm-group-head .bd-grip { opacity: 0; }
+
+/* ---------- 页面级大卡片拖拽（wb-sortcard）：整卡为排序节点、把手触发；
+   无标题卡片用左上角固定把手（wb-corner-grip） ---------- */
+.wb-sortcard { position: relative; }
+.wb-sortcard.is-card-dragging { opacity: .45; border-style: dashed; border-color: var(--primary); }
+.wb-corner-grip { position: absolute; top: 8px; left: 8px; }
+.module:not(.wb-fund) .card-title .bd-grip { margin-right: 8px; vertical-align: -4px; }
+.bd-progress {
+  flex: 1; min-width: 120px; height: 8px; border-radius: 6px; background: var(--panel-2);
+  border: 1px solid var(--border); overflow: hidden; display: inline-block;
+}
+.bd-progress > span { display: block; height: 100%; background: var(--green); border-radius: 6px; transition: width 0.4s var(--wb-spring); }
+
+/* ---------- 任务队列 ---------- */
+.todo-list { display: flex; flex-direction: column; }
+.todo-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px;
+  border: 1px solid transparent; transition: background 0.15s ease;
+}
+.todo-item:hover { background: var(--panel-2); border-color: var(--border); }
+.todo-item.is-dragging {
+  opacity: 0.4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.todo-check {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--panel); color: #fff; font-size: 0.72rem; line-height: 1;
+  display: inline-grid; place-items: center; cursor: pointer; flex-shrink: 0; padding: 0;
+  transition: all 0.18s var(--wb-spring);
+}
+.todo-check:hover { border-color: var(--primary); }
+.todo-check.on { background: var(--green); border-color: var(--green); transform: scale(1.08); }
+/* 任务 = 标题 + 可选内容（双击条目弹窗编辑） */
+.todo-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.todo-title { font-size: 0.9rem; line-height: 1.35; overflow-wrap: anywhere; }
+.todo-item.done .todo-title { color: var(--text-3); text-decoration: line-through; }
+/* 待办标题行：芯片紧贴标题右侧；标题过长时芯片不换行挤压，整体随行换行 */
+.todo-title-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.todo-title-row .todo-title { flex: 1; min-width: 0; }
+.todo-note {
+  font-size: 0.75rem; color: var(--text-2); line-height: 1.4; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.todo-date { font-size: 0.72rem; color: var(--text-3); }
+.todo-overlay, .ann-overlay, .ck-overlay, .wt-overlay, .ck-sec-overlay {
+  background: var(--panel); border: 1px solid var(--primary); border-radius: 10px;
+  box-shadow: var(--shadow-lg); cursor: grabbing; z-index: 40;
+  transform: scale(1.03);
+  animation: wb-pop 0.2s var(--wb-spring);
+}
+.todo-overlay { display: flex; align-items: center; gap: 8px; padding: 8px 12px; min-width: 260px; }
+.todo-overlay .todo-body { flex: 1; }
+
+/* ---------- 任务队列 · 待办事项块（轻量清单，每条可选截止日期） ---------- */
+.todo-block { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 12px; }
+.todo-block-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.todo-block-title { font-weight: 700; font-size: 0.92rem; }
+.todo-block-sub { font-size: 0.75rem; color: var(--text-3); flex: 1; }
+.todo-add-due { width: 138px; flex-shrink: 0; }
+/* 截止日期芯片：逾期红 / 今天橙 / 常规灰；无期限显示幽灵按钮，悬停行时才显形 */
+.todo-due {
+  border: 1px solid var(--border); background: var(--panel-2); color: var(--text-2);
+  font-size: 0.72rem; border-radius: 6px; padding: 2px 7px; cursor: pointer; flex-shrink: 0;
+  font-variant-numeric: tabular-nums; white-space: nowrap; font-family: inherit;
+}
+.todo-due:hover { border-color: var(--primary); color: var(--primary-dark); }
+.todo-due.overdue { color: var(--red); border-color: var(--red); background: var(--red-soft); font-weight: 700; }
+.todo-due.today { color: var(--orange); border-color: var(--orange); background: var(--orange-soft); font-weight: 700; }
+.todo-due.ghost { opacity: 0; }
+.todo-item:hover .todo-due.ghost, .todo-item:focus-within .todo-due.ghost { opacity: 1; }
+/* 编辑弹窗里的截止日期行：日期输入占满，右侧清除按钮 */
+.todo-due-edit-row { display: flex; align-items: center; gap: 8px; }
+.todo-due-edit-row .input { flex: 1; min-width: 0; }
+.todo-due-edit-row .btn { flex-shrink: 0; }
+
+/* ---------- 纪念日 ---------- */
+.ann-head, .ann-row {
+  display: grid; align-items: center; gap: 8px;
+}
+.ann-head {
+  padding: 6px 10px 6px 0; font-size: 0.78rem; font-weight: 700; color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.ann-list { display: flex; flex-direction: column; }
+.ann-row { padding: 6px 10px 6px 0; border-bottom: 1px dashed var(--border); border-radius: 8px; }
+.ann-row:hover { background: var(--panel-2); }
+.ann-row.is-dragging {
+  opacity: 0.4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.ann-cell { font-size: 0.88rem; padding: 2px 4px; }
+.ann-days { font-weight: 800; color: var(--primary-dark); }
+.ann-months { justify-self: start; }
+.ann-add {
+  display: grid; align-items: center; gap: 8px; margin-top: 10px;
+  padding: 8px 10px 8px 0; border-top: 1px solid var(--border);
+}
+.ann-add .bd-inline { background: var(--panel-2); border-color: var(--border); }
+
+/* ---------- 护肤打卡 ---------- */
+.ck-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+.ck-section {
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px 12px;
+  background: var(--panel-2);
+}
+.ck-section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ck-section-name { font-weight: 700; font-size: 0.92rem; flex: 1; min-width: 0; }
+.ck-groups { display: flex; flex-direction: column; gap: 10px; }
+.ck-group {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 10px 10px;
+}
+.ck-group.is-dragging {
+  opacity: 0.4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.ck-group-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.ck-group-name { font-weight: 700; font-size: 0.86rem; flex: 1; min-width: 0; }
+.ck-progress { flex-shrink: 0; }
+.ck-steps { display: flex; flex-direction: column; }
+.ck-step {
+  display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 8px;
+  border: 1px solid transparent;
+}
+.ck-step:hover { background: var(--panel-2); }
+.ck-step.is-dragging {
+  opacity: 0.4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.ck-check { width: 19px; height: 19px; font-size: 0.66rem; border-width: 2px; }
+.ck-step.done .ck-step-name { text-decoration: line-through; color: var(--text-3); }
+.ck-step-name { flex: 1; min-width: 0; font-size: 0.84rem; padding: 3px 6px; }
+.ck-add-step { margin-top: 6px; }
+.ck-add-step .bd-inline { width: 100%; background: var(--panel-2); border-color: var(--border); font-size: 0.8rem; }
+.ck-overlay { min-width: 220px; padding: 8px 12px; }
+.ck-overlay .ck-group-head { margin-bottom: 0; }
+.ck-overlay .ck-group-name { font-weight: 700; }
+
+/* 分区/分组/步骤的把手显形已并入上方全站统一规则（.ck-section-head/.ck-group-head/.ck-step） */
+/* 分区本身可拖动（横向网格排序） */
+.ck-section.is-dragging {
+  opacity: 0.4; border-style: dashed; border-color: var(--primary); background: var(--primary-soft);
+}
+.ck-sec-overlay { width: 300px; padding: 10px 12px; }
+.ck-sec-overlay .ck-section-head { margin-bottom: 0; }
+.ck-sec-overlay .ck-section-name { font-weight: 700; }
+
+/* ---------- 表格类（每周数据 / 自定义表格） ---------- */
+.wt-scroll { overflow-x: auto; padding-bottom: 4px; }
+.wt-table, .wt-row {
+  display: grid; gap: 0; align-items: stretch; min-width: 900px;
+}
+.wt-table { border: 1px solid var(--border); border-radius: 10px 10px 0 0; overflow: hidden; border-bottom: none; }
+.wt-head-cell {
+  padding: 10px 12px; background: var(--wt-head-bg); color: var(--wt-head-text);
+  font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 4px; min-width: 0;
+}
+/* 每周数据表头：星期名 + 对应日期两行展示（居中） */
+.wt-daycell { flex-direction: column; align-items: center; gap: 1px; justify-content: center; text-align: center; }
+.wt-head-day { line-height: 1.25; }
+.wt-head-date { font-size: 0.8rem; font-weight: 600; opacity: 0.8; line-height: 1.1; }
+/* 整列复制：表头悬停显「⧉ 复制」；复制模式下源列置灰、其余列表头高亮为粘贴目标 */
+.wt-daycopy {
+  border: 1px solid var(--border); background: var(--panel); color: var(--text-2);
+  font-size: 0.66rem; font-weight: 600; border-radius: 999px; padding: 1px 9px;
+  cursor: pointer; opacity: 0; transition: opacity 0.15s ease, background 0.15s ease;
+}
+.wt-daycell:hover .wt-daycopy, .wt-daycell:focus-within .wt-daycopy { opacity: 1; }
+.wt-daycopy:hover { background: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary); }
+.wt-daycell.is-copysrc { opacity: 0.5; }
+.wt-daycell.is-paste {
+  cursor: pointer; background: var(--primary-soft); color: var(--primary-dark);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.wt-copybar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px 12px; margin-bottom: 10px; font-size: 0.85rem;
+  border: 1px dashed var(--primary); border-radius: 10px; background: var(--primary-soft);
+}
+.wt-header .wt-head-cell { border-bottom: 1px solid var(--border); }
+.wt-corner { background: var(--wt-head-bg); color: var(--wt-head-text); justify-content: center; text-align: center; }
+.wt-rows { display: flex; flex-direction: column; }
+.wt-row {
+  border: 1px solid var(--border); border-top: none; background: var(--panel);
+  border-radius: 0; transition: background 0.15s ease;
+}
+.wt-row:hover { background: var(--panel-2); }
+.wt-row.is-dragging {
+  opacity: 0.4; border: 1px dashed var(--primary); background: var(--primary-soft);
+}
+.wt-rowhead { display: flex; align-items: center; gap: 4px; padding: 4px 6px; min-width: 0; background: var(--wt-head-bg); }
+.wt-rowname {
+  flex: 1; min-width: 0; font-weight: 700; font-size: 1rem; color: var(--wt-head-text-dark);
+  padding: 3px 6px; text-align: center;
+}
+/* 行头删除按钮不占位：仅悬停「记录项」行头本体时才出现（悬停行其他列不打扰），窄行头也能放下长行名 */
+.wt-rowhead .bd-del { display: none; }
+.wt-rowhead:hover .bd-del { display: inline-flex; opacity: 1; }
+.wt-colhead { background: var(--wt-head-bg); }
+.wt-addcol { gap: 4px; background: var(--panel-2); color: var(--text-2); }
+.wt-addcol .bd-inline { min-width: 0; flex: 1; padding: 3px 6px; }
+.wt-rownum { background: none; }
+.wt-cell {
+  padding: 10px 14px; font-size: 1.05rem; line-height: 1.5; cursor: pointer;
+  border-left: 1px solid var(--border); display: flex; align-items: center; min-width: 0;
+  justify-content: center; text-align: center; /* 列内容居中，宽列下视觉更均衡 */
+  transition: background 0.15s ease;
+}
+.wt-cell:hover { filter: brightness(0.97); }
+.wt-cell.mark-1 { background: var(--green-soft); }
+.wt-cell.mark-2 { background: var(--orange-soft); }
+.wt-cell.editing { cursor: default; padding: 4px 6px; }
+.wt-text { overflow-wrap: anywhere; white-space: pre-wrap; }
+.wt-edit { width: 100%; display: flex; flex-direction: column; gap: 5px; }
+.wt-edit .bd-inline { background: var(--panel); border-color: var(--primary); font-size: 1.05rem; }
+/* 多行编辑框：回车换行，随行数自适应高度 */
+.wt-edit-area { resize: none; width: 100%; line-height: 1.5; }
+.wt-edit-hint { font-size: 0.7rem; color: var(--text-3); }
+.wt-marks { display: flex; gap: 6px; }
+/* 编辑浮层操作条：标记圆点 + 清空按钮（清空需弹窗确认） */
+.wt-editbar { display: flex; align-items: center; gap: 6px; }
+.wt-clear-btn {
+  border: 1px solid var(--border); background: var(--panel); color: var(--red);
+  font-size: 0.72rem; font-weight: 600; border-radius: 7px; padding: 2px 8px; flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.wt-clear-btn:hover { background: var(--red-soft); border-color: var(--red); }
+.wt-mark-dot {
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--panel); cursor: pointer; padding: 0;
+  transition: transform 0.15s var(--wb-spring);
+}
+.wt-mark-dot:hover { transform: scale(1.2); }
+.wt-mark-dot.m1 { border-color: var(--green); }
+.wt-mark-dot.m1.on { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+.wt-mark-dot.m2 { border-color: var(--orange); }
+.wt-mark-dot.m2.on { background: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+.wt-weeklabel { font-size: 0.85rem; }
+
+/* ---------- 周标签/日期标签日历弹层（每周数据换周 + 护肤打卡换日共用） ---------- */
+.wt-weekwrap { position: relative; display: inline-flex; }
+.wt-weekbtn { cursor: pointer; transition: filter 0.15s ease; }
+.wt-weekbtn:hover { filter: brightness(0.96); }
+.wt-weekcaret { font-size: 0.62rem; margin-left: 2px; opacity: 0.75; }
+.wt-cal {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 60; width: 256px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-lg); padding: 10px 12px 8px;
+}
+.wt-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+.wt-cal-title { font-weight: 700; font-size: 0.85rem; }
+.wt-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.wt-cal-wd { font-size: 0.68rem; color: var(--text-3); text-align: center; line-height: 1.9; }
+.wt-cal-day {
+  border: none; background: none; color: var(--text); font-size: 0.78rem; font-weight: 600;
+  height: 30px; border-radius: 8px; cursor: pointer; padding: 0; line-height: 1;
+  transition: background 0.12s ease;
+}
+.wt-cal-day:hover:not(:disabled) { background: var(--primary-soft); color: var(--primary-dark); }
+.wt-cal-day:disabled { cursor: not-allowed; }
+.wt-cal-day.is-off { color: var(--text-3); opacity: 0.55; }
+.wt-cal-day.is-cur { background: var(--primary-soft); color: var(--primary-dark); }
+.wt-cal-day.is-today { box-shadow: inset 0 0 0 1.5px var(--primary); }
+.wt-cal-day.is-sel { background: var(--primary); color: var(--panel); } /* 所查看的那一天（护肤打卡日历用） */
+.wt-cal-hint { margin-top: 6px; font-size: 0.68rem; color: var(--text-3); }
+
+/* ---------- 每周数据 · 今天所在周高亮（月视图）+ 表头今天徽标 ---------- */
+.wt-head-date.is-today {
+  background: var(--primary); color: #fff; opacity: 1;
+  border-radius: 999px; padding: 0 7px; font-weight: 700;
+}
+.wt-month-block.is-now .wt-table { border-color: var(--primary); }
+.wt-month-block.is-now .wt-row { border-left-color: var(--primary); border-right-color: var(--primary); }
+.wt-month-block.is-now .wt-row:last-child { border-bottom-color: var(--primary); }
+.wt-month-block.is-now .wt-month-title { color: var(--primary-dark); }
+
+/* ---------- 每周数据 · 按月总览（整周自上而下铺开） ---------- */
+.wt-monthwrap { max-height: 72vh; overflow-y: auto; }
+.wt-month-block { margin-bottom: 24px; }
+.wt-month-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.wt-month-title { font-weight: 800; font-size: 0.92rem; color: var(--text-2); }
+.wt-month-block .wt-row:last-child { border-bottom: 1px solid var(--border); border-radius: 0 0 10px 10px; }
+.wt-addrow {
+  display: flex; gap: 8px; align-items: center; padding: 8px 10px;
+  border: 1px dashed var(--border); border-top: none; border-radius: 0 0 10px 10px;
+}
+.wt-addrow .bd-inline { flex: 1; }
+.wt-legend { display: inline-flex; align-items: center; gap: 4px; margin: 0 6px; }
+
+/* ---------- 设置：添加模块表单 ---------- */
+.wb-addmod {
+  border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px;
+  background: var(--panel-2);
+}
+.wb-icon-pick { font-size: 0.95rem; padding: 3px 9px; }
+
+/* 手机端：看板工具栏换行、减内边距 */
+@media (max-width: 860px) {
+  .bd-panel { padding: 12px; }
+  .ck-cols { grid-template-columns: 1fr; }
+}
+
+/* ---------- 习惯打卡（habit 看板）：streak + 热力图 ---------- */
+.hb-list { display: flex; flex-direction: column; gap: 10px; }
+
+.hb-row {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+  padding: 10px 12px;
+}
+
+.hb-row.is-dragging { box-shadow: var(--shadow); opacity: .95; }
+.hb-row.hb-overlay { display: flex; align-items: center; gap: 10px; width: 320px; }
+.hb-row.hb-overlay .hb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.hb-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.hb-row .hb-name { flex: 1; min-width: 0; }
+
+.hb-streak {
+  flex: none; font-size: 0.78rem; font-weight: 600; padding: 2px 10px;
+  border-radius: 999px; color: var(--text-3);
+  background: var(--panel-2); border: 1px solid var(--border);
+}
+
+.hb-streak.on {
+  color: #b97a16; background: var(--orange-soft, rgba(232, 161, 60, .12));
+  border-color: rgba(232, 161, 60, .5);
+}
+
+/* ---------- 按月矩阵图（回看 + 点击过去某天补打/取消） ---------- */
+.hb-viz { margin: 8px 0 2px 30px; overflow-x: auto; padding-bottom: 4px; }
+.hb-matrix { display: grid; grid-template-columns: repeat(7, 18px); gap: 3px; width: max-content; }
+.hb-matrix-wd {
+  font-size: 0.6rem; font-weight: 700; color: var(--text-3);
+  text-align: center; line-height: 18px;
+}
+.hb-mcell {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--panel-2); border: 1px solid var(--border);
+}
+.hb-mcell.blank { background: transparent; border-color: transparent; }
+.hb-mcell.on { background: var(--green); border-color: var(--green); }
+.hb-mcell.today { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.hb-mcell.future { opacity: 0.3; }
+.hb-mcell.markable { cursor: pointer; }
+.hb-mcell.markable:hover { border-color: var(--primary); }
+/* 年度面板：12 个迷你月历 */
+.hb-year { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.hb-ymonth {
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 8px;
+}
+.hb-ymonth-label { display: block; font-size: 0.66rem; font-weight: 700; color: var(--text-2); margin-bottom: 4px; }
+.hb-matrix.compact { grid-template-columns: repeat(7, 9px); gap: 2px; }
+.hb-matrix.compact .hb-matrix-wd { display: none; }
+.hb-matrix.compact .hb-mcell { width: 9px; height: 9px; border-radius: 2px; }
+
+/* ---------- 深色主题微调（主覆盖层在 wb-theme.css） ---------- */
+[data-theme="dark"] .wt-cell:hover { filter: brightness(1.25); }
+[data-theme="dark"] .hb-streak.on { color: var(--orange); }
+
+/* ---------- 任务队列双队列（常规 / 周末，跨队列拖拽） ---------- */
+.todo-queues {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px; align-items: start;
+}
+@media (max-width: 920px) { .todo-queues { grid-template-columns: 1fr; } }
+.todo-queue {
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 12px 10px; background: var(--panel);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.todo-queue.is-over { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.todo-queue-empty {
+  border: 1.5px dashed var(--border); border-radius: 10px; padding: 22px 14px;
+  text-align: center; color: var(--text-3); font-size: 0.82rem;
+}
+.todo-queue.is-over .todo-queue-empty {
+  border-color: var(--primary); color: var(--primary-dark); background: var(--primary-soft);
+}
+
+/* ---------- 每周小结（周视图编辑块 + 月总览展示条） ---------- */
+.wt-summary-block {
+  margin-top: 14px; border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px; background: var(--panel);
+}
+.wt-summary-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.wt-summary-title { font-weight: 700; font-size: 0.92rem; }
+.wt-summary-sub { font-size: 0.75rem; color: var(--text-3); }
+.wt-summary-area { width: 100%; min-height: 96px; resize: vertical; line-height: 1.55; font-size: 0.88rem; }
+.wt-month-summary {
+  margin: 8px 12px 12px; padding: 8px 12px; background: var(--panel-2);
+  border-radius: 8px; font-size: 0.84rem; display: flex; gap: 10px; align-items: flex-start;
+}
+.wt-ms-label { flex-shrink: 0; color: var(--text-3); font-weight: 600; }
+.wt-ms-text { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+
+/* 表头悬停「🗑 清空」整列按钮：样式与 ⧉ 复制 同款，悬停红色警示（危险操作） */
+.wt-dayclear {
+  border: 1px solid var(--border); background: var(--panel); color: var(--text-2);
+  font-size: 0.66rem; font-weight: 600; border-radius: 999px; padding: 1px 9px;
+  cursor: pointer; opacity: 0; transition: opacity 0.15s ease, background 0.15s ease;
+}
+.wt-daycell:hover .wt-dayclear, .wt-daycell:focus-within .wt-dayclear { opacity: 1; }
+.wt-dayclear:hover { background: var(--red-soft); color: var(--red); border-color: var(--red); }
