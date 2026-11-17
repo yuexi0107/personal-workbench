@@ -2,7 +2,12 @@
 // 复用外壳的 useLocalState（wb:ls-change 事件即时同步），与 iw:/fp: 前缀互不干扰。
 import { useMemo, useCallback, useEffect, useReducer } from 'react'
 import { useLocalState, readLS, writeLS, WB } from '../app/store.js'
-import { defaultBoardData } from './seed.js'
+import { defaultBoardData as demoBoardData } from './seed.js'
+
+// 本地私人种子覆盖：seed.local.js 在 .gitignore 中忽略，仅本机生效，永不入库；
+// 新克隆无此文件时 import.meta.glob 返回空对象，自动回退仓库自带的演示种子。
+const localSeed = import.meta.glob('./seed.local.js', { eager: true })['./seed.local.js']
+const defaultBoardData = localSeed?.defaultBoardData || demoBoardData
 
 export const uid = () => `k${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`
 
